@@ -1,0 +1,56 @@
+services:
+  app:
+    build: .
+    container_name: catatan_app
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:80:3000"
+    environment:
+      PORT: 3000
+      OWNER_NAME: ${OWNER_NAME:-Mahasiswa}
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:?DB_NAME wajib diisi di .env}
+      DB_USER: ${DB_USER:?DB_USER wajib diisi di .env}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diisi di .env}
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/up || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - frontend
+      - backend
+
+  database:
+    image: mysql:8.4
+    container_name: catatan_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:?DB_NAME wajib diisi di .env}
+      MYSQL_USER: ${DB_USER:?DB_USER wajib diisi di .env}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diisi di .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD wajib diisi di .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - backend
+    # Tidak ada "ports": database tidak dibuka ke publik
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
+volumes:
+  mysql_data:

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catatan Cloud</title>
+  <style>
+    :root { --bg:#f5f6fa; --card:#fff; --text:#1f2937; --muted:#6b7280; --accent:#2563eb; --danger:#dc2626; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#111827; --card:#1f2937; --text:#f3f4f6; --muted:#9ca3af; --accent:#60a5fa; --danger:#f87171; }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--text); }
+    main { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+    h1 { margin: 0 0 4px; }
+    .owner { color: var(--muted); margin-bottom: 20px; }
+    .card { background: var(--card); border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--muted); border-radius: 6px; background: transparent; color: var(--text); font: inherit; }
+    button { padding: 10px 16px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
+    button.hapus { background: var(--danger); padding: 6px 10px; font-size: 13px; }
+    .item-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .item-head h3 { margin: 0; }
+    small { color: var(--muted); }
+    p { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Catatan Cloud</h1>
+    <div class="owner" id="owner"></div>
+
+    <div class="card">
+      <input id="judul" placeholder="Judul catatan">
+      <textarea id="isi" rows="3" placeholder="Isi catatan"></textarea>
+      <button id="simpan">Simpan</button>
+    </div>
+
+    <div id="daftar"></div>
+  </main>
+
+  <script>
+    const daftar = document.getElementById("daftar");
+
+    function buatItem(c) {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const head = document.createElement("div");
+      head.className = "item-head";
+      const h3 = document.createElement("h3");
+      h3.textContent = c.judul;
+      const btn = document.createElement("button");
+      btn.className = "hapus";
+      btn.textContent = "Hapus";
+      btn.onclick = async () => {
+        await fetch("/api/catatan/" + c.id, { method: "DELETE" });
+        muat();
+      };
+      head.append(h3, btn);
+
+      const p = document.createElement("p");
+      p.textContent = c.isi;
+      const s = document.createElement("small");
+      s.textContent = new Date(c.created_at).toLocaleString("id-ID");
+
+      card.append(head, p, s);
+      return card;
+    }
+
+    async function muat() {
+      const res = await fetch("/api/catatan");
+      const data = await res.json();
+      daftar.replaceChildren(...data.map(buatItem));
+    }
+
+    document.getElementById("simpan").onclick = async () => {
+      const judul = document.getElementById("judul").value.trim();
+      const isi = document.getElementById("isi").value.trim();
+      if (!judul || !isi) return alert("Judul dan isi wajib diisi.");
+      await fetch("/api/catatan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ judul, isi }),
+      });
+      document.getElementById("judul").value = "";
+      document.getElementById("isi").value = "";
+      muat();
+    };
+
+    fetch("/api/info").then(r => r.json()).then(d => {
+      document.getElementById("owner").textContent = "Dideploy oleh: " + d.owner;
+    });
+    muat();
+  </script>
+</body>
+</html>
