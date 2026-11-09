@@ -42,6 +42,10 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        .card.full-width {
+            grid-column: 1 / -1;
+            border-left-color: #48bb78;
+        }
         .card h3 {
             margin-top: 0;
             color: #2d3748;
@@ -61,6 +65,12 @@
         }
         .value {
             color: #2b6cb0;
+        }
+        .feature-list {
+            margin: 5px 0;
+            padding-left: 20px;
+            color: #2f855a;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -92,6 +102,14 @@
                 <div class="info-item"><span class="label">Architecture:</span> <span class="value"><?php echo php_uname('m'); ?></span></div>
                 <div class="info-item"><span class="label">Current Time:</span> <span class="value"><?php echo date('Y-m-d H:i:s'); ?></span></div>
                 <div class="info-item"><span class="label">Request Method:</span> <span class="value"><?php echo $_SERVER['REQUEST_METHOD']; ?></span></div>
+            </div>
+
+            <!-- PHP 8.4 Features -->
+            <div class="card full-width">
+                <h3>✨ PHP 8.4 Features</h3>
+                <ul class="feature-list">
+                    <li>Property Hooks</li>
+                </ul>
             </div>
         </div>
     </div>
