@@ -68,7 +68,7 @@
     <div class="container">
         <h1>🚀 PHP Info Dashboard</h1>
         <div class="subtitle">PHP Version: <?php echo phpversion(); ?></div>
-
+        
         <div class="grid">
             <!-- Server Info -->
             <div class="card">
